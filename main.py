@@ -154,8 +154,14 @@ if uploaded_file and st.session_state.file_processed:
             
             col1, col2 = st.columns([3, 1])
             with col1:
-                with st.expander("View Extracted JSON", expanded=True):
-                    st.json(st.session_state.extracted_data)
+                #with st.expander("View Extracted JSON", expanded=True):
+                    #st.json(st.session_state.extracted_data)
+                with st.expander("View Extracted Details", expanded=True):
+                    if isinstance(st.session_state.extracted_data, dict):
+                        for key, value in st.session_state.extracted_data.items():
+                            st.markdown(f"**{key}**: {value}")
+                    else:
+                        st.warning("No structured data available or invalid format.")
             with col2:
                 if st.button("Re-extract"):
                     st.session_state.extract_status = "not_started"
