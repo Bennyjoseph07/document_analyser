@@ -3,6 +3,7 @@ import json
 from utils.parser import parse_pdf, parse_docx
 from utils.generator import extract_vitals, generate_section
 
+st.set_page_config(page_title="AI RFP Assistant", layout="wide")
 # Load persona hints
 try:
     with open("data/persona_hints.json") as f:
@@ -12,7 +13,7 @@ except FileNotFoundError:
     st.warning("persona_hints.json not found. Using default hints.")
 
 # Page config
-st.set_page_config(page_title="AI RFP Assistant", layout="wide")
+#st.set_page_config(page_title="AI RFP Assistant", layout="wide")
 st.title("AI RFP Assistant")
 st.markdown("Upload an RFP document and let the AI extract structured details and generate proposal drafts.")
 
