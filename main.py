@@ -14,30 +14,29 @@ except FileNotFoundError:
     
 def render_structured_data(data):
     for section, content in data.items():
-        with st.expander(f"📄 {section}", expanded=False):
-            if isinstance(content, dict):
-                for key, value in content.items():
-                    if isinstance(value, dict):
+        st.markdown(f"### 📄 {section}")
+        if isinstance(content, dict):
+            for key, value in content.items():
+                if isinstance(value, dict):
+                    st.markdown(f"**{key}**")
+                    for subkey, subval in value.items():
+                        st.markdown(f"- `{subkey}`: `{subval}`")
+                elif isinstance(value, list):
+                    if value:
                         st.markdown(f"**{key}**")
-                        for subkey, subval in value.items():
-                            st.markdown(f"- {subkey}: `{subval}`")
-                    elif isinstance(value, list):
-                        if value:
-                            st.markdown(f"**{key}**:")
-                            for idx, item in enumerate(value, 1):
-                                st.markdown(f"- {item}")
-                        else:
-                            st.markdown(f"**{key}**: _None_")
+                        for i, item in enumerate(value, 1):
+                            st.markdown(f"- {item}")
                     else:
-                        st.markdown(f"**{key}**: `{value}`")
-            elif isinstance(content, list):
-                if content:
-                    for idx, item in enumerate(content, 1):
-                        st.markdown(f"{idx}. {item}")
+                        st.markdown(f"**{key}**: _None_")
                 else:
-                    st.markdown("_No entries_")
-            else:
-                st.markdown(f"`{content}`")
+                    st.markdown(f"**{key}**: `{value}`")
+        elif isinstance(content, list):
+            for idx, item in enumerate(content, 1):
+                st.markdown(f"{idx}. {item}")
+        else:
+            st.markdown(f"`{content}`")
+        st.markdown("---")  # separator between sections
+
 
 # Page config
 #st.set_page_config(page_title="AI RFP Assistant", layout="wide")
