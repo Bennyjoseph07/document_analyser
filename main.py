@@ -11,6 +11,33 @@ try:
 except FileNotFoundError:
     persona_hints = {}
     st.warning("persona_hints.json not found. Using default hints.")
+    
+def render_structured_data(data):
+    for section, content in data.items():
+        with st.expander(f"📄 {section}", expanded=False):
+            if isinstance(content, dict):
+                for key, value in content.items():
+                    if isinstance(value, dict):
+                        st.markdown(f"**{key}**")
+                        for subkey, subval in value.items():
+                            st.markdown(f"- {subkey}: `{subval}`")
+                    elif isinstance(value, list):
+                        if value:
+                            st.markdown(f"**{key}**:")
+                            for idx, item in enumerate(value, 1):
+                                st.markdown(f"- {item}")
+                        else:
+                            st.markdown(f"**{key}**: _None_")
+                    else:
+                        st.markdown(f"**{key}**: `{value}`")
+            elif isinstance(content, list):
+                if content:
+                    for idx, item in enumerate(content, 1):
+                        st.markdown(f"{idx}. {item}")
+                else:
+                    st.markdown("_No entries_")
+            else:
+                st.markdown(f"`{content}`")
 
 # Page config
 #st.set_page_config(page_title="AI RFP Assistant", layout="wide")
@@ -158,8 +185,7 @@ if uploaded_file and st.session_state.file_processed:
                     #st.json(st.session_state.extracted_data)
                 with st.expander("View Extracted Details", expanded=True):
                     if isinstance(st.session_state.extracted_data, dict):
-                        for key, value in st.session_state.extracted_data.items():
-                            st.markdown(f"**{key}**: {value}")
+                        render_structured_data(st.session_state.extracted_data)
                     else:
                         st.warning("No structured data available or invalid format.")
             with col2:
