@@ -2,8 +2,8 @@ import streamlit as st
 import json
 from utils.parser import parse_pdf, parse_docx
 from utils.generator import extract_vitals, generate_section
+from ui.visualize import render_extracted_data
 
-st.set_page_config(page_title="AI RFP Assistant", layout="wide")
 # Load persona hints
 try:
     with open("data/persona_hints.json") as f:
@@ -11,35 +11,9 @@ try:
 except FileNotFoundError:
     persona_hints = {}
     st.warning("persona_hints.json not found. Using default hints.")
-    
-def render_structured_data(data):
-    for section, content in data.items():
-        st.markdown(f"### 📄 {section}")
-        if isinstance(content, dict):
-            for key, value in content.items():
-                if isinstance(value, dict):
-                    st.markdown(f"**{key}**")
-                    for subkey, subval in value.items():
-                        st.markdown(f"- `{subkey}`: `{subval}`")
-                elif isinstance(value, list):
-                    if value:
-                        st.markdown(f"**{key}**")
-                        for i, item in enumerate(value, 1):
-                            st.markdown(f"- {item}")
-                    else:
-                        st.markdown(f"**{key}**: _None_")
-                else:
-                    st.markdown(f"**{key}**: `{value}`")
-        elif isinstance(content, list):
-            for idx, item in enumerate(content, 1):
-                st.markdown(f"{idx}. {item}")
-        else:
-            st.markdown(f"`{content}`")
-        st.markdown("---")  # separator between sections
-
 
 # Page config
-#st.set_page_config(page_title="AI RFP Assistant", layout="wide")
+st.set_page_config(page_title="AI RFP Assistant", layout="wide")
 st.title("AI RFP Assistant")
 st.markdown("Upload an RFP document and let the AI extract structured details and generate proposal drafts.")
 
@@ -180,13 +154,9 @@ if uploaded_file and st.session_state.file_processed:
             
             col1, col2 = st.columns([3, 1])
             with col1:
-                #with st.expander("View Extracted JSON", expanded=True):
+                with st.expander("View Extracted JSON", expanded=True):
+                    render_extracted_data(st.session_state.extracted_data)
                     #st.json(st.session_state.extracted_data)
-                with st.expander("View Extracted Details", expanded=True):
-                    if isinstance(st.session_state.extracted_data, dict):
-                        render_structured_data(st.session_state.extracted_data)
-                    else:
-                        st.warning("No structured data available or invalid format.")
             with col2:
                 if st.button("Re-extract"):
                     st.session_state.extract_status = "not_started"
