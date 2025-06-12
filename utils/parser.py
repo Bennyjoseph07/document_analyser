@@ -3,6 +3,7 @@
 import fitz  # PyMuPDF
 import docx2txt
 import json
+import pandas as pd
 
 def parse_pdf(file):
     doc = fitz.open(stream=file.read(), filetype="pdf")
@@ -23,3 +24,21 @@ def sanitize_dict_for_table(d):
         else:
             result[k] = v
     return result
+
+def flatten_for_csv(data):
+        rows = []
+        if isinstance(data, dict):
+            for section, content in data.items():
+                if isinstance(content, dict):
+                    for k, v in content.items():
+                        rows.append({"Section": section, "Key": k, "Value": str(v)})
+                elif isinstance(content, list):
+                    for idx, item in enumerate(content, 1):
+                        if isinstance(item, dict):
+                            for k, v in item.items():
+                                rows.append({"Section": section, "Key": f"{k} [{idx}]", "Value": str(v)})
+                        else:
+                            rows.append({"Section": section, "Key": f"Item [{idx}]", "Value": str(item)})
+                else:
+                    rows.append({"Section": section, "Key": "", "Value": str(content)})
+        return pd.DataFrame(rows)
