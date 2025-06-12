@@ -1,8 +1,9 @@
 import streamlit as st
 import json
-from utils.parser import parse_pdf, parse_docx
+from utils.parser import parse_pdf, parse_docx,flatten_for_csv
 from utils.generator import extract_vitals, generate_section
 from ui.visualize import render_extracted_data
+import pandas as pd
 
 # Load persona hints
 try:
@@ -19,6 +20,8 @@ st.markdown("Upload an RFP document and let the AI extract structured details an
 
 # Sections
 sections = ["Executive Summary", "Technical Solution", "Delivery Plan", "Assumptions"]
+
+
 
 # Initialize session state
 if "extract_status" not in st.session_state:
@@ -156,12 +159,31 @@ if uploaded_file and st.session_state.file_processed:
             with col1:
                 with st.expander("View Extracted JSON", expanded=True):
                     render_extracted_data(st.session_state.extracted_data)
-                    #st.json(st.session_state.extracted_data)
+                    #st.json(st.session_state.extracted_data)      
             with col2:
                 if st.button("Re-extract"):
                     st.session_state.extract_status = "not_started"
                     st.session_state.extracted_data = None
                     st.rerun()
+                # --- Download Buttons ---
+                st.markdown("#### Download Extracted Data")
+                extracted_json_str = json.dumps(st.session_state.extracted_data, indent=2, ensure_ascii=False)
+                st.download_button(
+                    label="Download as TXT (JSON)",
+                    data=extracted_json_str,
+                    file_name="rfp_extracted.json.txt",
+                    mime="text/plain",
+                    key="download_json_txt"
+                )
+                extracted_df = flatten_for_csv(st.session_state.extracted_data)
+                csv_bytes = extracted_df.to_csv(index=False).encode("utf-8")
+                st.download_button(
+                    label="Download as CSV (Flattened)",
+                    data=csv_bytes,
+                    file_name="rfp_extracted.csv",
+                    mime="text/csv",
+                    key="download_csv"
+                )
 
         elif st.session_state.extract_status == "error":
             st.error("Extraction failed. Please try again.")
